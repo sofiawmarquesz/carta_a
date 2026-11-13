@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feliz Aniversário!</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Georgia', 'Times New Roman', serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #ffecd2 0%, #af4cd6 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* === PÁGINA DE CONTAGEM REGRESSIVA === */
+        .countdown-container {
+            text-align: center;
+            color: #845c40;
+        }
+
+        .countdown-container h1 {
+            font-size: 1.8em;
+            margin-bottom: 10px;
+            color: #7d5639;
+        }
+
+        .countdown-container h2 {
+            font-size: 1.2em;
+            margin-bottom: 40px;
+            font-weight: normal;
+            opacity: 0.85;
+        }
+
+        .countdown-boxes {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .count-item {
+            background: rgba(255,255,255,0.85);
+            border-radius: 12px;
+            padding: 25px 20px;
+            min-width: 100px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .count-number {
+            font-size: 3em;
+            font-weight: bold;
+            color: #ca44e1;
+        }
+
+        .count-label {
+            font-size: 0.95em;
+            margin-top: 8px;
+            color: #866a4a;
+        }
+
+        .waiting-note {
+            margin-top: 40px;
+            font-style: italic;
+            opacity: 0.8;
+            max-width: 420px;
+            line-height: 1.6;
+        }
+
+        /* === PÁGINA DA CARTA — ESCONDIDA ATÉ A DATA === */
+        .letter-section {
+            display: none;
+            text-align: center;
+        }
+
+        .letter-section h1 {
+            color: #e63946;
+            margin-bottom: 30px;
+            font-size: 1.8em;
+        }
+
+        .envelope-wrapper {
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .envelope-wrapper:hover {
+            transform: translateY(-5px);
+        }
+
+        .envelope {
+            width: 420px;
+            max-width: 100%;
+            height: 280px;
+            background: #fff8f0;
+            border: 2px solid #d4a373;
+            border-radius: 0 0 10px 10px;
+            position: relative;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+            margin: 0 auto;
+        }
+
+        .envelope::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 140px;
+            background: #f8e2c8;
+            border-radius: 0 0 50% 50%;
+            transform-origin: top center;
+            transition: all 0.6s ease;
+            z-index: 2;
+            border-bottom: 2px solid #d4a373;
+        }
+
+        .envelope.open::before {
+            transform: rotateX(180deg);
+            background: #fff0dd;
+        }
+
+        .seal {
+            position: absolute;
+            top: 110px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 55px;
+            height: 55px;
+            background: #e63946;
+            border-radius: 50%;
+            z-index: 3;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 28px;
+            transition: opacity 0.4s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .envelope.open .seal {
+            opacity: 0;
+        }
+
+        .letter {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            width: 370px;
+            max-width: 90%;
+            height: 250px;
+            background: #fffef9;
+            border-radius: 3px;
+            padding: 25px;
+            overflow-y: auto;
+            opacity: 0;
+            transition: all 0.6s ease 0.3s;
+            z-index: 1;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+            border: 1px solid #eee;
+            line-height: 1.7;
+            color: #333;
+        }
+
+        .envelope.open .letter {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-20px);
+            z-index: 5;
+        }
+
+        .letter h2 {
+            text-align: center;
+            color: #e63946;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+
+        .letter p {
+            text-align: left;
+            margin-bottom: 12px;
+            font-size: 1em;
+        }
+
+        .letter .signature {
+            text-align: right;
+            margin-top: 25px;
+            font-style: italic;
+        }
+
+        .hint {
+            text-align: center;
+            margin-top: 25px;
+            color: #886c4c;
+            font-size: 0.95em;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            opacity: 0;
+            z-index: 100;
+            animation: fall linear forwards;
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+
+        /* Responsivo */
+        @media (max-width: 450px) {
+            .envelope {
+                width: 320px;
+                height: 220px;
+            }
+            .letter {
+                width: 290px;
+                height: 190px;
+                padding: 15px;
+            }
+            .count-item {
+                padding: 18px 15px;
+                min-width: 75px;
+            }
+            .count-number {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ========== SÓ APARECE ANTES DO DIA 14/11 ========== -->
+    <div class="countdown-container" id="countdownPage">
+        <h1>Contagem Regressiva</h1>
+        <h2>Apenas esperando para descobrir...</h2>
+        
+        <div class="countdown-boxes">
+            <div class="count-item">
+                <div class="count-number" id="days">--</div>
+                <div class="count-label">Dias</div>
+            </div>
+            <div class="count-item">
+                <div class="count-number" id="hours">--</div>
+                <div class="count-label">Horas</div>
+            </div>
+            <div class="count-item">
+                <div class="count-number" id="minutes">--</div>
+                <div class="count-label">Minutos</div>
+            </div>
+            <div class="count-item">
+                <div class="count-number" id="seconds">--</div>
+                <div class="count-label">Segundos</div>
+            </div>
+        </div>
+
+        <p class="waiting-note">
+            Sei que você não gosta de surpresas mas vale a pena esperar, prometo... 
+        </p>
+    </div>
+
+    <!-- ========== SÓ APARECE NO DIA 14/11 EM DIANTE ========== -->
+    <div class="letter-section" id="letterPage">
+        <h1>Feliz Aniversário!</h1>
+        
+        <div class="envelope-wrapper" id="envelopeWrapper">
+            <div class="envelope" id="envelope">
+                <div class="seal" id="seal">❤</div>
+                <div class="letter" id="letter">
+                    <h2>Feliz Aniversário!</h2>
+                    
+                    <p>Querida, Bianca Zanicoski</p>
+
+                    <p>Passei literalmente uma semana pensando em como começaria essa carta
+                    — não por não saber o que dizer, mas justamente por ter <em>tanto</em> a falar, e como você pode perceber, simplesmente não consegui 
+                    encontrar a forma certa. </p>
+
+                    <p>Pinterest por bastente tempo — “Palavras com significados bonitos”, para ser mais específica — 
+                    e me assustei ao perceber que todos aqueles significados se encaixam tão bem em você. De todos eles, encontrei alguns que 
+                    se destacam ainda mais: <em>Serendipidade</em> — que é o ato ou a capacidade de descobrir algo útil, valioso ou agradável por mero acaso, 
+                    sem que houvesse uma busca intencional por aquilo</p>
+
+                    <p>Passei um bom tempo refletindo sobre essa palavra, e pensei o quão incrível foi te encontrar do absoluto nada.
+                    Não estava te procurando, mas caralho, quando te achei foi como se o universo tivesse guardado você justamente para mim. 
+                    E hoje eu sei: não foi sorte, foi algo maior. Você é aquele tipo de encontro que faz a gente acreditar que o mundo realmente
+                    guarda coisas boas para nós. Sou imensamente grata por ter te encontrado.</p>
+
+                    <p><em>Meraki</em> — significa colocar amor, alma, criatividade e um pedaço de si mesmo em tudo o que se faz.
+                    Não existe outra palavra que te descreva tão bem quanto essa. É admirável a forma como você se dedica às coisas que gosta e àquelas a que se
+                    propõe a fazer. É encantador perceber o quanto de si você entrega à sua fé, e isso é algo que nunca vou me cansar de admirar.
+                    Espero, de todo o coração, que você nunca perca essa faísca que brilha dentro de si — seja pela sua fé ou por qualquer outra 
+                    coisa que te traga alegria e propósito.</p>
+
+                    <p><em>Inefável</em> é um adjetivo que descreve algo que não pode ser explicado, 
+                    narrado ou expresso com palavras — seja pela sua extrema beleza, complexidade, grandiosidade ou intensidade. 
+                    Sempre que tento colocar em frases o que você significa, as palavras me fogem. Fico sem palavras toda vez que tento falar sobre você: 
+                    sobre sua bondade que acalma, sua inteligência que inspira e essa sua beleza que vai muito além do que os olhos veem. Você é, de verdade, 
+                    indescritível. Algo tão grande, tão presente e tão intenso que, quando paro para perceber tudo que você é, sinto que as palavras simplesmente 
+                    não são suficientes para te abranger. Você é maior do que qualquer descrição que eu consiga encontrar.</p>
+
+                    <p>Na cultura japonesa, o conceito de <em>Ikigai</em> representa aquilo que desperta o nosso interesse,
+                    dá sentido à rotina e faz com que a gente queira se levantar todas as manhãs Essa palavra não achei no Pinterest; 
+                    foi o Google que me sugeriu pesquisar, quase como se o mundo inteiro já soubesse que você é exatamente isso para mim. 
+                    Pode parecer estranho ou até insano, mas mesmo depois de tudo, você ainda é um dos motivos pelos quais eu abro os olhos pela manhã. 
+                    Isso tem tudo a ver com a sua energia, a qual é como um café: às vezes forte e intenso, mas sempre doce na medida certa, sempre reconfortante.
+                     E o melhor de tudo? É autêntico. <em>É você</em>. E não existe sabor melhor no mundo do que esse.</p>
+
+                    <p>E por último, <em>Sempiterno</em> — aquilo que é eterno, que permanece, que nunca acaba. 
+                    Há tantas coisas sobre nós que eu sinto que serão assim para sempre, mas nada se compara ao amor que sinto por você.
+                    Antes de te conhecer, eu imaginava que amor era só aquela empolgação do começo, aquele brilho inicial. 
+                    Mas você me ensinou que o verdadeiro amor é como o tempo: não para, não some, simplesmente é. 
+                    Ele cresce, se fortalece e fica mais bonito a cada dia. Por isso digo com toda a certeza: o meu amor por você é sempiterno.
+                    Não existe "até quando" com você. Não há condições, não há prazo. Enquanto eu viver, você estará guardada aqui, no meu coração. 
+                    E mesmo além disso, eu sei — e sinto — que isso é para sempre.</p> 
+
+                    <p>De uns dias para cá, venho refletindo sobre o quão grata — <em>realmente grata</em> — eu sou por nossos destinos terem se cruzado,
+                    por ter recebido o seu carinho e o seu amor mesmo nos dias em que eu talvez não fosse a melhor companhia. Você é uma pessoa verdadeiramente
+                    admirável, Bianca. Todos que fazem parte da sua vida têm o privilégio de conviver com alguém tão especial. Você é uma tia maravilhosa,
+                    uma filha dedicada, uma irmã presente, uma amiga fiel e, acima de tudo, uma companheira que faz qualquer momento valer a pena.
+                    Você ilumina tudo ao redor com o seu brilho único. Ver você sorrir é um dos meus maiores prazeres, porque você é, simplesmente,
+                    a coisa mais linda que os meus olhos já viram. E mesmo nos dias em que você está impaciente ou de mau humor, 
+                    estar ao seu lado continua sendo o meu lugar favorito no mundo.</p>
+
+                    <p>Sei que hoje temos uma amizade que às vezes parece confusa, talvez até um pouco incerta em alguns momentos — mas isso não importa.
+                    O que importa é que eu estou aqui. Para tudo. Para cada detalhe, cada conquista e cada dificuldade. 
+                    Não importa como nossa relação seja daqui para frente: eu quero ser sempre o seu porto seguro. 
+                    Quero ser a primeira pessoa que você procura quando algo dá certo — e também quando está prestes a dar errado. 
+                    Quero estar ao seu lado em todos os seus momentos: dos mais radiantes aos mais difíceis. 
+                    Quero estar presente para comemorar suas vitórias e “segurar sua mão” quando precisar.
+                    Quero, de verdade, retribuir um pouquinho de tudo que você representa para mim.</p>
+
+                    <p>E por favor, nunca duvide de si mesma. Nunca questione o quanto você é importante e capaz. 
+                    Se um dia isso acontecer — se você esquecer por um instante o quanto é especial — me liga. A qualquer hora, em qualquer dia.
+                    Não me importo se vou passar horas repetindo: você é incrível, você é forte, você é capaz de tudo que deseja. 
+                    eu estarei aqui, sempre, para te lembrar disso quantas vezes forem necessárias.</p>
+
+                    <p>Muito obrigada, de verdade, por cada momento que dividimos juntas — cada detalhe, cada conversa, cada sorriso compartilhado 
+                    — com você, eu simplesmente sou eu. Obrigada por arrancar sorrisos meus mesmo nos dias em que tudo parece cinzento. 
+                    Obrigada por ser aquela pessoa em quem posso sempre confiar, e por estar presente quando mais preciso. 
+                    Você é, sem dúvida, a dona de metade do meu coração — talvez até mais do que isso.</p>
+
+                    <p>Dois anos se passaram e, a cada dia que passa, eu tenho o privilégio de te conhecer um pouquinho mais. 
+                    Dois anos com alguém tão especial ao meu lado. 
+                    Dois anos aprendendo com você, admirando você e escolhendo estar ao seu lado todos os dias.
+                    E o melhor de tudo? Foram dois anos inteiros em que meu coração escolheu apenas uma pessoa: <em>você</em>. 
+                    E faria isso de novo, mil vezes, se preciso fosse. Porque amar você é a coisa mais bonita que me permito fazer.</p>
+
+                    <p>Eu realmente espero que hoje seja um dia verdadeiramente incrível para você, gatinha.
+                    Que cada momento seja tão especial quanto você merece. Desejo que essa nova fase seja maravilhosa, repleta de aprendizados,
+                    conquistas e experiências que encham seu coração de alegria.</p>
+
+                    <p>Quero que você saiba que estou aqui para tudo: se as coisas ficarem difíceis, se precisar de alguém para compartilhar os momentos bons
+                    e os difíceis, ou simplesmente de um conselho. Não importa o momento, estarei ao seu lado, mesmo que seja apenas com palavras e pensamentos.</p>
+
+                    <p>Desejo a você, Bianca, tudo de mais bonito que a vida pode oferecer.
+                    E espero, mesmo de longe, poder estar presente em cada passo seu — aplaudindo cada vitória,
+                    torcendo por cada sonho que se realiza. Você já é incrível, e tenho certeza de que vai se tornar ainda mais: 
+                    uma mulher admirável, uma profissional brilhante que vai fazer a diferença na sua área, uma futura mamãe cheia de amor para dar e 
+                    uma esposa maravilhosa para quem tiver a sorte de te ter. Que as coisas mais lindas desse mundo encontrem você nesse novo caminho que 
+                    começa agora.</p>
+
+                    <p>Saiba que sinto um orgulho imenso de quem você é hoje e da mulher incrível que está se tornando a cada dia.
+                    E termino dizendo que, por mais que eu tente, não há palavras que meçam o quanto você significa para mim. <br> <br> Eu te amo, Bianca Zanicoski, 
+                    <em>hoje e sempre</em>. Feliz Aniversário, gatinha! </p>
+                    
+                    <p class="signature">Com muito carinho,<br>de sua Marques </p>
+                </div>
+            </div>
+        <p class="hint" id="hint">Clique no envelope para abrir a carta.</p>
+    </div>
+
+    <script>
+        // 📅 DATA DO ANIVERSÁRIO: 14/11/2026 às 00:00
+        // Atenção: meses vão de 0 (janeiro) a 11 (dezembro) → novembro = 10
+        const DATA_ANIVERSARIO = new Date(2026, 10, 14, 0, 0, 0);
+
+        const countdownPage = document.getElementById('countdownPage');
+        const letterPage = document.getElementById('letterPage');
+        const daysEl = document.getElementById('days');
+        const hoursEl = document.getElementById('hours');
+        const minutesEl = document.getElementById('minutes');
+        const secondsEl = document.getElementById('seconds');
+        const envelope = document.getElementById('envelope');
+        const hint = document.getElementById('hint');
+
+        let isOpen = false;
+        let intervaloContagem;
+
+        function verificarData() {
+            const agora = new Date();
+            
+            if (agora >= DATA_ANIVERSARIO) {
+                mostrarCarta();
+                return;
+            }
+
+            iniciarContagem();
+        }
+
+        function iniciarContagem() {
+            atualizarContagem();
+            intervaloContagem = setInterval(atualizarContagem, 1000);
+        }
+
+        function atualizarContagem() {
+            const agora = new Date();
+            const diferenca = DATA_ANIVERSARIO - agora;
+
+            if (diferenca <= 0) {
+                clearInterval(intervaloContagem);
+                mostrarCarta();
+                return;
+            }
+
+            const dias = Math.floor(diferenca / (1000 * 60 * 60 * 24));
+            const horas = Math.floor((diferenca % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutos = Math.floor((diferenca % (1000 * 60 * 60)) / (1000 * 60));
+            const segundos = Math.floor((diferenca % (1000 * 60)) / 1000);
+
+            daysEl.textContent = dias;
+            hoursEl.textContent = horas.toString().padStart(2, '0');
+            minutesEl.textContent = minutos.toString().padStart(2, '0');
+            secondsEl.textContent = segundos.toString().padStart(2, '0');
+        }
+
+        function mostrarCarta() {
+            countdownPage.style.display = 'none';
+            letterPage.style.display = 'block';
+            configurarEnvelope();
+        }
+
+        function configurarEnvelope() {
+            envelope.addEventListener('click', () => {
+                isOpen = !isOpen;
+                envelope.classList.toggle('open');
+                
+                if (isOpen) {
+                    hint.textContent = 'Que seu dia seja maravilhoso.';
+                    lancarConfete();
+                } else {
+                    hint.textContent = 'Clique no envelope para abrir a carta.';
+                }
+            });
+        }
+
+        function lancarConfete() {
+            const cores = ['#ff6b6b', '#ffd93d', '#6bcb77', '#4d96ff', '#ff8585', '#ffc078'];
+            
+            for (let i = 0; i < 100; i++) {
+                setTimeout(() => {
+                    const confete = document.createElement('div');
+                    confete.classList.add('confetti');
+                    confete.style.left = Math.random() * 100 + 'vw';
+                    confete.style.backgroundColor = cores[Math.floor(Math.random() * cores.length)];
+                    confete.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                    confete.style.width = (Math.random() * 8 + 6) + 'px';
+                    confete.style.height = confete.style.width;
+                    confete.style.transform = `rotate(${Math.random() * 360}deg)`;
+                    document.body.appendChild(confete);
+                    
+                    setTimeout(() => confete.remove(), 5000);
+                }, i * 30);
+            }
+        }
+
+        window.addEventListener('load', verificarData);
+    </script>
+</body>
+</html>
